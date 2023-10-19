@@ -53,5 +53,5 @@ class Swish(Module):
         super().__init__()
 
     def forward(self, x:Tensor) -> Tensor:
-        return input * sigmoid(x)
+        return x * sigmoid(x)
 
