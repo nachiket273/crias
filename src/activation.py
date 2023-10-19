@@ -8,14 +8,16 @@ This module contains the activation functions used in various transformer papers
 4) 
 """
 
-from torch import erf, nn, pow, tanh, Tensor
+from torch import erf, pow, tanh, sigmoid, Tensor
+from torch.nn import Module
 
 
 M_SQRT1_2=0.70710678118654752440
 M_SQRT2=1.41421356237309504880
 M_2_SQRTPI=1.12837916709551257390
 
-class GELU(nn.Module):
+
+class GELU(Module):
     r""" Applies the Gaussian Error Linear Units function:
 
     Args:
@@ -44,3 +46,12 @@ class GELU(nn.Module):
     
     def __repr__(self):
         return f"{self.__class__.__name__}(approx= \'{self.approx}\')"
+
+
+class Swish(Module):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, x:Tensor) -> Tensor:
+        return input * sigmoid(x)
+
