@@ -8,7 +8,9 @@ This module contains the activation functions used in various transformer papers
 4) 
 """
 
-from torch import erf, pow, tanh, sigmoid, Tensor
+from torch import erf, pow, split
+from torch import sigmoid, tanh
+from torch import Tensor
 from torch.nn import Module
 
 
@@ -20,7 +22,7 @@ M_2_SQRTPI=1.12837916709551257390
 class GELU(Module):
     r""" Applies the Gaussian Error Linear Units function:
 
-    Maths:
+    Math:
         Exact:
             output = x * \Phi(x)
             Phi - Cumulative Distribution Function for Gaussian Distribution
@@ -59,7 +61,7 @@ class GELU(Module):
 class Swish(Module):
     r""" Applies the Sigmoid Linear Unit (SiLU)/swish function, element-wise.
 
-    Maths:
+    Math:
         output = x * \sigma(x)
         sigma - logistic sigmoid
 
@@ -73,4 +75,31 @@ class Swish(Module):
 
     def forward(self, x:Tensor) -> Tensor:
         return x * sigmoid(x)
+
+
+class GLU(Module):
+    r""" The gated linear unit
+
+    Math:
+        output = a * \sigma(b)
+        where input is split in 2 halves a, b along dimension = dim
+        sigma - logistic sigmoid
+
+    Args:
+        dim(int, optional): Dimension along which the input tensor is split into half
+                            Default: -1
+
+    Example:
+        >>> glu = GLU()
+        >>> x = torch.randn(5, 4)
+        >>> output = glu(x)
+    """
+    def __init__(self, dim: int=-1) -> None:
+        super().__init__()
+        self.dim = -1
+
+    def forward(self, x: Tensor) -> Tensor:
+        a, b = split(x, 2, dim= self.dim)
+        return a * sigmoid(b)
+    
 
