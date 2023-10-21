@@ -20,6 +20,14 @@ M_2_SQRTPI=1.12837916709551257390
 class GELU(Module):
     r""" Applies the Gaussian Error Linear Units function:
 
+    Maths:
+        Exact:
+            output = x * \Phi(x)
+            Phi - Cumulative Distribution Function for Gaussian Distribution
+
+        Approximation:
+            output = 0.5 * x * (1 + Tanh(\sqrt{2 / pi} * (x + 0.044715 * x^3)))
+
     Args:
         approx(str, optional): gelu approximation algorithm to use.
                                ['none', 'tanh']
@@ -49,6 +57,17 @@ class GELU(Module):
 
 
 class Swish(Module):
+    r""" Applies the Sigmoid Linear Unit (SiLU)/swish function, element-wise.
+
+    Maths:
+        output = x * \sigma(x)
+        sigma - logistic sigmoid
+
+    Example:
+        >>> swish = Swish()
+        >>> x = torch.randn(5)
+        >>> output = swish(x)
+    """
     def __init__(self) -> None:
         super().__init__()
 
