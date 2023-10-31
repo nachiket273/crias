@@ -39,17 +39,22 @@ class RMSNorm(Module):
             self.off = Parameter(zeros(self.dim))
             self.register_parameter('offset', self.off)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.dim}, partial={self.partial}, eps={self.eps}, bias={self.bias})"
+
     def forward(self, x: Tensor) -> Tensor:
         if self.partial != -1:
             # Partial RMSNorm
             dimx = int(self.dim * self.partial)
+            if dimx == 0:
+                dimx = 1
             partial_x, _ = split(x, [dimx, self.dim - dimx], dim=-1)
             normx = norm(partial_x, 2, dim=-1, keepdim=True)
         else:
             normx = norm(x, 2, dim=-1, keepdim=True)
             dimx = self.dim
 
-        rms = normx /  sqrt(self.dim)
+        rms = normx  *  dimx ** (-1./2)
         x_normed = x / (rms + self.eps)
 
         if self.bias:
