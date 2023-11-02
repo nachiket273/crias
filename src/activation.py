@@ -16,6 +16,7 @@ from torch import sigmoid, tanh
 from torch import Tensor
 from torch.nn import Module, ReLU
 
+__all__ = ['GELU', 'Swish', 'GLU', 'Bilinear', 'ReGLU', 'GEGLU', 'SwiGLU']
 
 M_SQRT1_2=0.70710678118654752440
 M_SQRT2=1.41421356237309504880
@@ -45,6 +46,7 @@ class GELU(Module):
     """
     __constants__ = ['approx']
     approx: str
+
     def __init__(self, approx: str = 'none') -> None:
         super().__init__()
         self.approx = approx.lower()
@@ -58,7 +60,7 @@ class GELU(Module):
         return 0.5 * x * ( 1 +  erf(0.70710678118654752440 * x))
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(approx= \'{self.approx}\')"
+        return f"{self.__class__.__name__}(approx=\'{self.approx}\')"
 
 
 class Swish(Module):
@@ -78,6 +80,9 @@ class Swish(Module):
 
     def forward(self, x:Tensor) -> Tensor:
         return x * sigmoid(x)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"
 
 
 class GLU(Module):
@@ -97,6 +102,9 @@ class GLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = glu(x)
     """
+    __constants__ = ['dim']
+    dim: int
+
     def __init__(self, dim: int=-1) -> None:
         super().__init__()
         self.dim = dim
@@ -104,6 +112,9 @@ class GLU(Module):
     def forward(self, x: Tensor) -> Tensor:
         a, b = split(x, 2, dim= self.dim)
         return a * sigmoid(b)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.dim})"
     
 
 class Bilinear(Module):
@@ -122,6 +133,9 @@ class Bilinear(Module):
         >>> x = torch.randn(5, 4)
         >>> output = bl(x)
     """
+    __constants__ = ['dim']
+    dim: int
+
     def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self.dim = dim
@@ -129,6 +143,9 @@ class Bilinear(Module):
     def forward(self, x: Tensor) -> Tensor:
         a, b = split(x, 2, dim= self.dim)
         return a * b
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.dim})"
 
 
 class ReGLU(Module):
@@ -151,6 +168,10 @@ class ReGLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = reglu(x)
     """
+    __constants__ = ['dim', 'inplace']
+    dim: int
+    inplace: bool
+
     def __init__(self, dim:int = -1, inplace:bool = True) -> None:
         super().__init__()
         self.dim = dim
@@ -159,6 +180,9 @@ class ReGLU(Module):
     def forward(self, x: Tensor) -> Tensor:
         a, b = split(x, 2, dim= self.dim)
         return a * self.relu(b)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.dim}, activation={self.relu})"
 
 
 class GEGLU(Module):
@@ -182,6 +206,10 @@ class GEGLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = geglu(x)
     """
+    __constants__ = ['dim', 'approx']
+    dim: int
+    approx: str
+
     def __init__(self, dim:int = -1, approx: str = 'none') -> None:
         super().__init__()
         self.dim = dim
@@ -190,6 +218,9 @@ class GEGLU(Module):
     def forward(self, x: Tensor) -> Tensor:
         a, b = split(x, 2, dim= self.dim)
         return a * self.gelu(b)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.dim}, activation={self.gelu})"
 
 
 class SwiGLU(Module):
@@ -209,6 +240,9 @@ class SwiGLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = swiglu(x)
     """
+    __constants__ = ['dim']
+    dim: int
+    
     def __init__(self, dim:int = -1) -> None:
         super().__init__()
         self.dim = dim
@@ -217,3 +251,6 @@ class SwiGLU(Module):
     def forward(self, x: Tensor) -> Tensor:
         a, b = split(x, 2, dim= self.dim)
         return a * self.swish(b)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(dim={self.dim}, activation={self.swish})"
