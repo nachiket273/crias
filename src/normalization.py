@@ -3,15 +3,16 @@ Implements normalization techniques used in transformers, especially
 1) Layer Normalization (https://arxiv.org/pdf/1607.06450.pdf)
 2) RMSNorm (https://arxiv.org/pdf/1910.07467.pdf)
 """
+from typing import List, Union
 from torch import ones, zeros
 from torch import norm, split
 from torch import Size, Tensor
 from torch.nn import Module, Parameter
-from typing import List, Union
 
 __all__ = ['RMSNorm', 'LayerNorm']
 
 input_shape = Union[int, List[int], Size]
+
 
 class RMSNorm(Module):
     r""" Applies RMSNorm to the input of the layer
@@ -24,7 +25,7 @@ class RMSNorm(Module):
                                   Default: 1e-8
         bias(bool, optional):     Whether to use bias for RMSNorm.
                                   Default: False
-                                  
+
     Example:
         >>> rmsnorm = RMSNorm(4)
         >>> x = torch.randn((5, 4))
@@ -36,12 +37,14 @@ class RMSNorm(Module):
     eps: float
     bias: bool
 
-    def __init__(self, dim: int, partial: int=-1, eps: float = 1e-8, bias: bool=False) -> None:
+    def __init__(self, dim: int, partial: int = -1,
+                 eps: float = 1e-8, bias: bool = False) -> None:
         super().__init__()
         self.dim = dim
         self.partial = partial
         if self.partial != -1 and (self.partial < 0 or self.partial > 1):
-            raise ValueError("Value of parameter partial should be in range [0,1]")
+            raise ValueError("Value of parameter partial "
+                             "should be in range [0,1]")
         self.eps = eps
         self.bias = bias
         self.__init_parameters__()
@@ -54,7 +57,9 @@ class RMSNorm(Module):
             self.register_parameter('offset', self.off)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(dim={self.dim}, partial={self.partial}, eps={self.eps}, bias={self.bias})"
+        return f"{self.__class__.__name__}\
+            (dim={self.dim}, partial={self.partial},\
+                eps={self.eps}, bias={self.bias})"
 
     def forward(self, x: Tensor) -> Tensor:
         if self.partial != -1:
@@ -68,12 +73,12 @@ class RMSNorm(Module):
             normx = norm(x, 2, dim=-1, keepdim=True)
             dimx = self.dim
 
-        rms = normx  *  dimx ** (-1./2)
+        rms = normx * dimx ** (-1./2)
         x_normed = x / (rms + self.eps)
 
         if self.bias:
             return self.scale * x_normed + self.off
-        
+
         return self.scale * x_normed
 
 
@@ -81,14 +86,16 @@ class LayerNorm(Module):
     r""" Applies Layer Normalization to the input of the layer.
 
     Args:
-        shape(int or list or torch.Size, required): Input shape from an expected input of size
-        eps(float, optional):                       The epsilon value for arithmetic stability.
+        shape(int or list or torch.Size, required): Input shape from
+                                                    an expected input of size
+        eps(float, optional):                       The epsilon value for
+                                                    arithmetic stability.
                                                     Default: 1e-8
         gamma(bool, optional):                      Add scale parameter.
                                                     Default: True
         offset(bool, optional):                     Add bias parameter.
                                                     Default: True
-    
+
     Example:
         >>> lnorm = LayerNorm(4)
         >>> x = torch.randn((5, 4))
@@ -100,7 +107,8 @@ class LayerNorm(Module):
     gamma: bool
     offset: bool
 
-    def __init__(self, shape: input_shape, eps: float=1e-8, gamma: bool=True, offset: bool=True) -> None:
+    def __init__(self, shape: input_shape, eps: float = 1e-8,
+                 gamma: bool = True, offset: bool = True) -> None:
         super().__init__()
         if isinstance(shape, int):
             self.shape = (shape, )
@@ -121,11 +129,12 @@ class LayerNorm(Module):
             self.register_parameter('bias', self.bias)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(shape={self.shape}, eps={self.eps}, gamma={self.gamma}, offset={self.offset})"
-    
+        return f"{self.__class__.__name__}\
+            (shape={self.shape}, eps={self.eps},\
+                gamma={self.gamma}, offset={self.offset})"
+
     def forward(self, x: Tensor) -> Tensor:
         mean = x.mean(dim=-1, keepdim=True)
-        # var = x.var(dim=-1, keepdim=True)
         var = ((x - mean)**2).mean(dim=-1, keepdim=True)
         y = (x - mean) / (var + self.eps).sqrt()
         if self.gamma:

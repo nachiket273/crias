@@ -1,7 +1,9 @@
 """
-Activation functions used in transformers. (as mentioned in https://arxiv.org/pdf/2002.05202v1.pdf)
+Activation functions used in transformers. (as mentioned
+in https://arxiv.org/pdf/2002.05202v1.pdf)
 
-This module contains the activation functions used in various transformer papers including:
+This module contains the activation functions used in various transformer
+papers including:
 1) GELU
 2) Swish
 3) GLU
@@ -18,9 +20,9 @@ from torch.nn import Module, ReLU
 
 __all__ = ['GELU', 'Swish', 'GLU', 'Bilinear', 'ReGLU', 'GEGLU', 'SwiGLU']
 
-M_SQRT1_2=0.70710678118654752440
-M_SQRT2=1.41421356237309504880
-M_2_SQRTPI=1.12837916709551257390
+M_SQRT1_2 = 0.70710678118654752440
+M_SQRT2 = 1.41421356237309504880
+M_2_SQRTPI = 1.12837916709551257390
 
 
 class GELU(Module):
@@ -50,15 +52,16 @@ class GELU(Module):
     def __init__(self, approx: str = 'none') -> None:
         super().__init__()
         self.approx = approx.lower()
-        assert self.approx in ['none', 'tanh'], "Parameter approx takes values in ['none', 'tanh']"
+        assert self.approx in ['none', 'tanh'], \
+            "Parameter approx takes values in ['none', 'tanh']"
 
     def forward(self, x: Tensor) -> Tensor:
         if self.approx == 'tanh':
-            self.const = 0.5 * M_SQRT2 * M_2_SQRTPI  # sqrt(2/pi)
-            return 0.5 * x * (1 + tanh(self.const * (x + 0.044715 * pow(x, 3))))
+            const = 0.5 * M_SQRT2 * M_2_SQRTPI  # sqrt(2/pi)
+            return 0.5 * x * (1 + tanh(const * (x + 0.044715 * pow(x, 3))))
         # else (none)
-        return 0.5 * x * ( 1 +  erf(0.70710678118654752440 * x))
-    
+        return 0.5 * x * (1 + erf(0.70710678118654752440 * x))
+
     def __repr__(self):
         return f"{self.__class__.__name__}(approx=\'{self.approx}\')"
 
@@ -78,9 +81,9 @@ class Swish(Module):
     def __init__(self) -> None:
         super().__init__()
 
-    def forward(self, x:Tensor) -> Tensor:
+    def forward(self, x:  Tensor) -> Tensor:
         return x * sigmoid(x)
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
@@ -94,7 +97,8 @@ class GLU(Module):
         sigma - logistic sigmoid
 
     Args:
-        dim(int, optional): Dimension along which the input tensor is split into half
+        dim(int, optional): Dimension along which the input tensor is split
+                            into half
                             Default: -1
 
     Example:
@@ -105,17 +109,17 @@ class GLU(Module):
     __constants__ = ['dim']
     dim: int
 
-    def __init__(self, dim: int=-1) -> None:
+    def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self.dim = dim
 
     def forward(self, x: Tensor) -> Tensor:
-        a, b = split(x, 2, dim= self.dim)
+        a, b = split(x, 2, dim=self.dim)
         return a * sigmoid(b)
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}(dim={self.dim})"
-    
+
 
 class Bilinear(Module):
     r"""" The gated linear unit without any activation
@@ -125,7 +129,8 @@ class Bilinear(Module):
         where input is split in 2 halves a, b along dimension = dim
 
     Args:
-        dim(int, optional): Dimension along which the input tensor is split into half
+        dim(int, optional): Dimension along which the input tensor is split
+                            into half
                             Default: -1
 
     Example:
@@ -141,9 +146,9 @@ class Bilinear(Module):
         self.dim = dim
 
     def forward(self, x: Tensor) -> Tensor:
-        a, b = split(x, 2, dim= self.dim)
+        a, b = split(x, 2, dim=self.dim)
         return a * b
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}(dim={self.dim})"
 
@@ -157,7 +162,8 @@ class ReGLU(Module):
         where relu - rectified linear unit[max(0, b)]
 
     Args:
-        dim(int, optional):      Dimension along which the input tensor is split into half
+        dim(int, optional):      Dimension along which the input tensor
+                                 is split into half
                                  Default: -1
 
         inplace(bool, optional): Input for relu, to be calculated in place
@@ -172,17 +178,18 @@ class ReGLU(Module):
     dim: int
     inplace: bool
 
-    def __init__(self, dim:int = -1, inplace:bool = True) -> None:
+    def __init__(self, dim: int = -1, inplace: bool = True) -> None:
         super().__init__()
         self.dim = dim
         self.relu = ReLU(inplace=inplace)
 
     def forward(self, x: Tensor) -> Tensor:
-        a, b = split(x, 2, dim= self.dim)
+        a, b = split(x, 2, dim=self.dim)
         return a * self.relu(b)
-    
+
     def __repr__(self):
-        return f"{self.__class__.__name__}(dim={self.dim}, activation={self.relu})"
+        return f"{self.__class__.__name__}\
+            (dim={self.dim}, activation={self.relu})"
 
 
 class GEGLU(Module):
@@ -194,7 +201,8 @@ class GEGLU(Module):
         where gelu - Gaussian Error Linear Units
 
     Args:
-        dim(int, optional):    Dimension along which the input tensor is split into half
+        dim(int, optional):    Dimension along which the input tensor is
+                               split into half
                                Default: -1
 
         approx(str, optional): GELU approximation algorithm to use.
@@ -210,17 +218,18 @@ class GEGLU(Module):
     dim: int
     approx: str
 
-    def __init__(self, dim:int = -1, approx: str = 'none') -> None:
+    def __init__(self, dim: int = -1, approx: str = 'none') -> None:
         super().__init__()
         self.dim = dim
         self.gelu = GELU(approx=approx)
 
     def forward(self, x: Tensor) -> Tensor:
-        a, b = split(x, 2, dim= self.dim)
+        a, b = split(x, 2, dim=self.dim)
         return a * self.gelu(b)
-    
+
     def __repr__(self):
-        return f"{self.__class__.__name__}(dim={self.dim}, activation={self.gelu})"
+        return f"{self.__class__.__name__}\
+            (dim={self.dim}, activation={self.gelu})"
 
 
 class SwiGLU(Module):
@@ -232,7 +241,8 @@ class SwiGLU(Module):
         where swish - Sigmoid Linear Unit (SiLU)/swish function
 
     Args:
-        dim(int, optional): Dimension along which the input tensor is split into half
+        dim(int, optional): Dimension along which the input tensor is
+                            split into half
                             Default: -1
 
     Example:
@@ -242,15 +252,16 @@ class SwiGLU(Module):
     """
     __constants__ = ['dim']
     dim: int
-    
-    def __init__(self, dim:int = -1) -> None:
+
+    def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self.dim = dim
         self.swish = Swish()
 
     def forward(self, x: Tensor) -> Tensor:
-        a, b = split(x, 2, dim= self.dim)
+        a, b = split(x, 2, dim=self.dim)
         return a * self.swish(b)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(dim={self.dim}, activation={self.swish})"
+        return f"{self.__class__.__name__}\
+            (dim={self.dim}, activation={self.swish})"
