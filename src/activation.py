@@ -46,9 +46,6 @@ class GELU(Module):
         >>> x = torch.randn(5)
         >>> output = gelu(x)
     """
-    __constants__ = ['approx']
-    approx: str
-
     def __init__(self, approx: str = 'none') -> None:
         super().__init__()
         self.approx = approx.lower()
@@ -106,9 +103,6 @@ class GLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = glu(x)
     """
-    __constants__ = ['dim']
-    dim: int
-
     def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self.dim = dim
@@ -138,9 +132,6 @@ class Bilinear(Module):
         >>> x = torch.randn(5, 4)
         >>> output = bl(x)
     """
-    __constants__ = ['dim']
-    dim: int
-
     def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self.dim = dim
@@ -174,10 +165,6 @@ class ReGLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = reglu(x)
     """
-    __constants__ = ['dim', 'inplace']
-    dim: int
-    inplace: bool
-
     def __init__(self, dim: int = -1, inplace: bool = True) -> None:
         super().__init__()
         self.dim = dim
@@ -214,10 +201,6 @@ class GEGLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = geglu(x)
     """
-    __constants__ = ['dim', 'approx']
-    dim: int
-    approx: str
-
     def __init__(self, dim: int = -1, approx: str = 'none') -> None:
         super().__init__()
         self.dim = dim
@@ -250,9 +233,6 @@ class SwiGLU(Module):
         >>> x = torch.randn(5, 4)
         >>> output = swiglu(x)
     """
-    __constants__ = ['dim']
-    dim: int
-
     def __init__(self, dim: int = -1) -> None:
         super().__init__()
         self.dim = dim

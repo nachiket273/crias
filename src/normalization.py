@@ -31,12 +31,6 @@ class RMSNorm(Module):
         >>> x = torch.randn((5, 4))
         >>> output = rmsnorm(x)
     """
-    __constants__ = ['dim', 'partial', 'eps', 'bias']
-    dim: int
-    partial: int
-    eps: float
-    bias: bool
-
     def __init__(self, dim: int, partial: int = -1,
                  eps: float = 1e-8, bias: bool = False) -> None:
         super().__init__()
@@ -101,12 +95,6 @@ class LayerNorm(Module):
         >>> x = torch.randn((5, 4))
         >>> output = lnorm(x)
     """
-    __constants__ = ['shape', 'eps', 'gamma', 'offset']
-    shape: input_shape
-    eps: float
-    gamma: bool
-    offset: bool
-
     def __init__(self, shape: input_shape, eps: float = 1e-8,
                  gamma: bool = True, offset: bool = True) -> None:
         super().__init__()
