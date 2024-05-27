@@ -1,6 +1,6 @@
 from collections import Counter
 from itertools import islice, tee
-from typing import Int, List
+from typing import Int, List, Tuple
 
 __all__ = ['get_stats', 'merge', 'Tokenizer']
 
@@ -12,6 +12,9 @@ def get_stats(ids : List[Int]) -> Counter:
     Args:
         ids(list of int) List of ids
 
+    Return:
+        Counter of occurances of pairs
+
     Example:
         >>> ids = [1, 2, 4, 1, 3, 1, 2, 4]
         >>> cnt = get_stats(ids)
@@ -22,7 +25,7 @@ def get_stats(ids : List[Int]) -> Counter:
         next(islice(it, i, i), None)
     return Counter(zip(*iters))
 
-def merge(ids, pair, idx):
+def merge(ids: List[Int], pair: Tuple[Int, Int], idx: int) -> List[Int]:
     r"""
     Replace each occurance of pair in list of ids with new given id.
 
@@ -30,6 +33,9 @@ def merge(ids, pair, idx):
         ids(list of int)   List of ids
         pair(tuple of int) Tuple of ids- pair to be replaced.
         idx(int)           Id with which the pair will be replaced.
+
+    Return:
+        new_ids: List of ids
 
     Example:
         >>> ids = [1, 2, 4, 1, 3, 1, 2, 4]
@@ -68,28 +74,27 @@ class Tokenizer:
         self.merges = {}
         self.pattern = ""
         self.special_tokens = {}
-        self.__build_vocab()
-
-    def train(self, text):
-        raise NotImplementedError
-    
-    def encode(self, text):
-        raise NotImplementedError
-    
-    def decode(self, ids):
-        raise NotImplementedError
-    
-    def __build_vocab(self):
         self.vocab = {idx:bytes([idx]) for idx in range(256)}
+
+    def train(self, text: str):
+        raise NotImplementedError
+    
+    def encode(self, text: str):
+        raise NotImplementedError
+    
+    def decode(self, ids : List[Int]):
+        raise NotImplementedError
+    
+    def build_vocab(self):
         for (p1, p2), idx in self.merges.items():
             self.vocab[idx] = self.vocab[p1] + self.vocab[p2]
         for tok, idx in self.special_tokens.items():
             self.vocab[idx] = tok.encode("utf-8")
 
-    def save_model(self, path):
+    def save_model(self, path: str):
         # TO-DO: Implement
         pass
     
-    def load_model(self, path):
+    def load_model(self, path: str):
         # TO-DO: Implement
         pass
