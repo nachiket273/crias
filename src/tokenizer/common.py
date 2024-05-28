@@ -1,11 +1,11 @@
 from collections import Counter
 from itertools import islice, tee
-from typing import Int, List, Tuple
+from typing import List, Tuple
 
 __all__ = ['get_stats', 'merge', 'Tokenizer']
 
 
-def get_stats(ids : List[Int]) -> Counter:
+def get_stats(ids : List[int]) -> Counter:
     r"""
     Given a list of ids, return the count of consecutive id pairs.
 
@@ -25,7 +25,7 @@ def get_stats(ids : List[Int]) -> Counter:
         next(islice(it, i, i), None)
     return Counter(zip(*iters))
 
-def merge(ids: List[Int], pair: Tuple[Int, Int], idx: int) -> List[Int]:
+def merge(ids: List[int], pair: Tuple[int, int], idx: int) -> List[int]:
     r"""
     Replace each occurance of pair in list of ids with new given id.
 
@@ -82,7 +82,7 @@ class Tokenizer:
     def encode(self, text: str):
         raise NotImplementedError
     
-    def decode(self, ids : List[Int]):
+    def decode(self, ids : List[int]):
         raise NotImplementedError
     
     def build_vocab(self):
