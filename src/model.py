@@ -62,7 +62,9 @@ class RMSNorm(Module):
                       Default: 1e-6
 
     Example:
-        >>> 
+        >>> x = torch.randn((5, 2))
+        >>> rmsnorm = RMSNorm(dim=2)
+        >>> norm = rmsnorm(x)
     """
     def __init__(self, dim: int, eps: float = 1e-6) -> None:
         r"""
