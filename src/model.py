@@ -99,7 +99,6 @@ class RMSNorm(Module):
 class MLP(Module):
     r"""
     MLP Layer for transformer.
-    TBD - use fuse linear layer as used in Gemma(https://github.com/google/gemma_pytorch)
 
     Args:
         hid_dim (int) : Hidden dimension size
@@ -111,20 +110,29 @@ class MLP(Module):
                           Note:- it's ignored for Silu.
         mult (int) : Multiplier for calculating intermediate dim
                      Default: 4
+        use_llama_mlp (bool): MLP layer from llama/gemma
+                              Default: False
+        use_bias (bool) : Use bias in Linear Layer.
+                          Deafult: True
 
     Example:
         >>> x = torch.randn((5,2))
         >>> mlp = MLP(2)
-        >>> out = mlp(x) 
+        >>> out = mlp(x)
     """
     def __init__(self, hid_dim: int, use_geglu: bool = False,
-                 use_tanh: bool = True, mult: int = 4) -> None:
+                 use_tanh: bool = True, mult: int = 4,
+                 use_llama_mlp: bool = False,
+                 bias: bool = True) -> None:
         r""""
         Initilize MLP Layer
         """
         super().__init__()
-        self.c_fc = Linear(hid_dim, hid_dim * mult)
-        self.c_proj = Linear(mult * hid_dim, hid_dim)
+        self.c_fc_1 = Linear(hid_dim, hid_dim * mult, bias=bias)
+        self.c_proj = Linear(mult * hid_dim, hid_dim, bias=bias)
+        self.use_llama_mlp = use_llama_mlp
+        if use_llama_mlp:
+            self.c_fc_2 = Linear(hid_dim, mult * hid_dim, bias=bias)
         self.use_geglu = use_geglu
         self.use_tanh = use_tanh
 
@@ -133,5 +141,8 @@ class MLP(Module):
         Forward pass for MLP layer
         """
         x = self.c_fc(x)
-        x = activation(x, self.use_geglu, self.use_tanh)
+        if self.use_llama_mlp:
+            x = activation(x, self.use_geglu, self.use_tanh) * self.c_fc_2(x)
+        else:
+            x = activation(x, self.use_geglu, self.use_tanh)
         return self.c_proj(x)
